@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumina CineScreen Pro | Professional Filmmaker Screen Light & Lighting FX</title>
+  <meta name="description" content="Professional cinema screen light, CCT Kelvin white balance, Lee/Rosco cinema gels, precision hex/RGB color control, and dynamic lighting effects (Breathe, Police, Candle, Lightning, TV spill) for filmmakers and gaffers.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="mode-light">
+  <!-- Fullscreen Ambient / Screen Light Canvas Layer -->
+  <main id="lightCanvas" class="light-canvas" aria-label="Filmmaker Screen Light Canvas" role="region">
+    <!-- Center Eye Catchlight Ring / Softbox Shape (Optional Overlay) -->
+    <div id="catchlightShape" class="catchlight-shape"></div>
+    
+    <!-- Framing Aspect Matte Overlays (2.39:1, 1.85:1, 4:3, 9:16) -->
+    <div id="framingMatteTop" class="framing-matte matte-top"></div>
+    <div id="framingMatteBottom" class="framing-matte matte-bottom"></div>
+    <div id="framingMatteLeft" class="framing-matte matte-left"></div>
+    <div id="framingMatteRight" class="framing-matte matte-right"></div>
+
+    <!-- Master Dimmer / Brightness Overlay -->
+    <div id="dimmerOverlay" class="dimmer-overlay"></div>
+    
+    <!-- Vignette / Softbox Edge Falloff Layer -->
+    <div id="vignetteOverlay" class="vignette-overlay"></div>
+  </main>
+
+  <!-- Interactive Cine Control HUD -->
+  <aside id="controlHud" class="control-hud" role="dialog" aria-label="Filmmaker Lighting Console">
+    <div class="hud-glass">
+      
+      <!-- Top Bar: Brand, Status, Master Mode Actions -->
+      <header class="hud-header">
+        <div class="brand">
+          <div class="brand-badge">
+            <span class="badge-dot" id="liveDot"></span>
+            <span class="brand-name">Lumina <span class="brand-highlight">CineScreen Pro</span></span>
+          </div>
+          <div class="status-indicator">
+            <span id="currentModeLabel">Light Mode</span>
+            <span class="status-sep">•</span>
+            <span id="currentStatusDetail">3200K Tungsten</span>
+          </div>
+        </div>
+
+        <div class="primary-actions">
+          <!-- True Pitch Blackout Button -->
+          <button id="btnBlackout" class="action-btn blackout-btn" title="Pitch Blackout (Press B or Space)" aria-label="Pitch Blackout Mode">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="9" stroke="currentColor"/>
+              <path d="M12 3a9 9 0 0 1 0 18v-18z" fill="currentColor"/>
+            </svg>
+            <span>Blackout <kbd>B</kbd></span>
+          </button>
+
+          <!-- Screen Light Mode Button -->
+          <button id="btnScreenLight" class="action-btn light-btn active" title="Active Cinema Light (Press L)" aria-label="Cinema Light Mode">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5" fill="currentColor"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+            <span>Light <kbd>L</kbd></span>
+          </button>
+
+          <!-- Fullscreen Button -->
+          <button id="btnFullscreen" class="action-btn fs-btn" title="Toggle Fullscreen (Press F)" aria-label="Toggle Fullscreen">
+            <svg class="icon fs-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 3 21 3 21 9"/>
+              <polyline points="9 21 3 21 3 15"/>
+              <polyline points="21 14 21 21 14 21"/>
+              <polyline points="3 10 3 3 10 3"/>
+            </svg>
+            <span class="fs-text">Fullscreen <kbd>F</kbd></span>
+          </button>
+
+          <!-- Disappear / Stealth Controller Button -->
+          <button id="btnDisappearHud" class="action-btn disappear-btn" title="Disappear Controller for Clean Scene Lighting (Press H)" aria-label="Disappear Controller">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+            <span>Disappear <kbd>H</kbd></span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Navigation Tabs for Filmmaker Controls -->
+      <nav class="hud-tabs" role="tablist" aria-label="Filmmaker Tool Panels">
+        <button class="tab-link active" role="tab" aria-selected="true" aria-controls="panel-cct" id="tab-cct">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <span>CCT Kelvin</span>
+        </button>
+        <button class="tab-link" role="tab" aria-selected="false" aria-controls="panel-gels" id="tab-gels">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.5 17.5 2 12 2z"/></svg>
+          <span>Cinema Gels & Colors</span>
+        </button>
+        <button class="tab-link" role="tab" aria-selected="false" aria-controls="panel-effects" id="tab-effects">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          <span>Cinema FX</span>
+          <span class="tab-pill-fx" id="fxLiveBadge">Breathe</span>
+        </button>
+        <button class="tab-link" role="tab" aria-selected="false" aria-controls="panel-master" id="tab-master">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18"/></svg>
+          <span>Framing & Diffusion</span>
+        </button>
+      </nav>
+
+      <!-- ================= TAB 1: CCT KELVIN WHITE BALANCE ================= -->
+      <section class="tab-panel active" id="panel-cct" role="tabpanel" aria-labelledby="tab-cct">
+        <div class="cct-deck">
+          <div class="slider-card kelvin-card">
+            <div class="slider-header">
+              <div class="slider-title-group">
+                <span class="card-icon">🌡️</span>
+                <label for="tempSlider">Color Temperature (Kelvin)</label>
+              </div>
+              <span id="tempValue" class="slider-val highlight-val">3200K (Tungsten Halogen)</span>
+            </div>
+            
+            <div class="slider-rail-container">
+              <input type="range" id="tempSlider" min="1800" max="10000" value="3200" step="50" class="temp-range" aria-label="Color Temperature in Kelvin">
+              <div class="kelvin-ticks">
+                <span>1800K</span>
+                <span>2700K</span>
+                <span>3200K</span>
+                <span>4300K</span>
+                <span>5600K</span>
+                <span>6500K</span>
+                <span>10000K</span>
+              </div>
+            </div>
+
+            <!-- Standard Industry CCT Presets -->
+            <div class="quick-cct-buttons">
+              <button class="cct-quick-btn" data-kelvin="1850">1850K <span>Candle</span></button>
+              <button class="cct-quick-btn" data-kelvin="2400">2400K <span>Golden</span></button>
+              <button class="cct-quick-btn active" data-kelvin="3200">3200K <span>Tungsten</span></button>
+              <button class="cct-quick-btn" data-kelvin="4300">4300K <span>Fluorescent</span></button>
+              <button class="cct-quick-btn" data-kelvin="5600">5600K <span>Daylight</span></button>
+              <button class="cct-quick-btn" data-kelvin="6500">6500K <span>Cloudy</span></button>
+              <button class="cct-quick-btn" data-kelvin="8000">8000K <span>Shade</span></button>
+            </div>
+          </div>
+
+          <!-- Tint Balance (Green / Magenta Shift) -->
+          <div class="slider-card tint-card">
+            <div class="slider-header">
+              <div class="slider-title-group">
+                <span class="card-icon">⚖️</span>
+                <label for="tintSlider">Tint (Duv Balance)</label>
+              </div>
+              <span id="tintValue" class="slider-val">0 (Neutral)</span>
+            </div>
+            <input type="range" id="tintSlider" min="-50" max="50" value="0" step="1" class="tint-range" aria-label="Green to Magenta tint balance">
+            <div class="range-labels">
+              <span class="label-green">Minus Green (Magenta)</span>
+              <span class="label-center">Neutral</span>
+              <span class="label-magenta">Plus Green</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 2: CINEMA GELS, EXACT PALETTES & HSI ================= -->
+      <section class="tab-panel" id="panel-gels" role="tabpanel" aria-labelledby="tab-gels">
+        <div class="gels-deck">
+          
+          <!-- Precision Color Input Row (Hex, RGB, HSL) -->
+          <div class="precision-deck">
+            <div class="precision-card hex-input-card">
+              <label for="hexInput">Exact HEX</label>
+              <div class="input-with-preview">
+                <span class="swatch-bubble" id="hexSwatchBubble"></span>
+                <input type="text" id="hexInput" value="#FFF8E7" maxlength="7" spellcheck="false" placeholder="#RRGGBB" aria-label="Exact Hex Color Input">
+                <button id="btnCopyHex" class="mini-icon-btn" title="Copy Hex Code">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- RGB Inputs -->
+            <div class="precision-card rgb-inputs-card">
+              <span class="precision-label">Exact RGB (0-255)</span>
+              <div class="numeric-inputs-row">
+                <label class="num-field"><span>R</span><input type="number" id="rgbR" min="0" max="255" value="255"></label>
+                <label class="num-field"><span>G</span><input type="number" id="rgbG" min="0" max="248" value="248"></label>
+                <label class="num-field"><span>B</span><input type="number" id="rgbB" min="0" max="231" value="231"></label>
+              </div>
+            </div>
+
+            <!-- Interactive Native Picker & Save Button -->
+            <div class="precision-card picker-save-card">
+              <div class="native-picker-wrapper">
+                <input type="color" id="customColorInput" value="#FFF8E7" aria-label="Open color wheel picker">
+                <span class="picker-label-text">Color Wheel</span>
+              </div>
+              <button id="btnSavePreset" class="btn-save-palette" title="Save current color into custom palette bank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span>Save Color</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Cinema Gel Library Sections -->
+          <div class="gel-library-container">
+            <!-- Filter Category 1: Color Correction Gels (CTO / CTB / Straw) -->
+            <div class="gel-group">
+              <div class="gel-group-header">
+                <span class="gel-group-title">Lee & Rosco Color Correction (CTB / CTO)</span>
+                <span class="gel-group-badge">Industry Standard</span>
+              </div>
+              <div class="gel-chips-grid">
+                <button class="gel-chip" data-color="#85C5E3" data-name="Lee 201 Full CTB" title="Lee 201 Full CTB (Converts 3200K to 5700K)" style="--chip-c: #85C5E3;">
+                  <span class="gel-chip-code">CTB 201</span>
+                  <span class="gel-chip-desc">Full CTB</span>
+                </button>
+                <button class="gel-chip" data-color="#B4DBEE" data-name="Lee 202 Half CTB" title="Lee 202 Half CTB (Converts 3200K to 4300K)" style="--chip-c: #B4DBEE;">
+                  <span class="gel-chip-code">CTB 202</span>
+                  <span class="gel-chip-desc">Half CTB</span>
+                </button>
+                <button class="gel-chip" data-color="#F58220" data-name="Lee 204 Full CTO" title="Lee 204 Full CTO (Converts 6500K to 3200K)" style="--chip-c: #F58220;">
+                  <span class="gel-chip-code">CTO 204</span>
+                  <span class="gel-chip-desc">Full CTO</span>
+                </button>
+                <button class="gel-chip" data-color="#F9A852" data-name="Lee 205 Half CTO" title="Lee 205 Half CTO (Converts 6500K to 3800K)" style="--chip-c: #F9A852;">
+                  <span class="gel-chip-code">CTO 205</span>
+                  <span class="gel-chip-desc">Half CTO</span>
+                </button>
+                <button class="gel-chip" data-color="#FFE28A" data-name="Lee 247 Filter Straw" title="Lee 247 Filter Straw (Warm Golden Sunlight)" style="--chip-c: #FFE28A;">
+                  <span class="gel-chip-code">Straw 247</span>
+                  <span class="gel-chip-desc">Straw Sun</span>
+                </button>
+                <button class="gel-chip" data-color="#8BE882" data-name="Lee 244 Plus Green" title="Plus Green (Matches Fluorescents)" style="--chip-c: #8BE882;">
+                  <span class="gel-chip-code">+Green</span>
+                  <span class="gel-chip-desc">Plus Green</span>
+                </button>
+                <button class="gel-chip" data-color="#E882DF" data-name="Lee 248 Minus Green" title="Minus Green (Reduces Fluorescent Spikes)" style="--chip-c: #E882DF;">
+                  <span class="gel-chip-code">-Green</span>
+                  <span class="gel-chip-desc">Magenta</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Filter Category 2: Cinema Moods & Atmosphere -->
+            <div class="gel-group">
+              <div class="gel-group-header">
+                <span class="gel-group-title">Cinematic Moods & Practical Light Emulators</span>
+                <span class="gel-group-badge">Mood Casting</span>
+              </div>
+              <div class="gel-chips-grid">
+                <button class="gel-chip" data-color="#00E5FF" data-name="Blade Runner Cyan" title="Blade Runner Cyan (Sci-fi anamorphic rim)" style="--chip-c: #00E5FF;">
+                  <span class="gel-chip-code">CYAN</span>
+                  <span class="gel-chip-desc">Sci-Fi Rim</span>
+                </button>
+                <button class="gel-chip" data-color="#FF007F" data-name="Miami Neon Rose" title="Miami Neon Rose (Cyberpunk Key)" style="--chip-c: #FF007F;">
+                  <span class="gel-chip-code">NEON</span>
+                  <span class="gel-chip-desc">Rose Glow</span>
+                </button>
+                <button class="gel-chip" data-color="#8B5CF6" data-name="Cyberpunk Violet" title="Cyberpunk Violet" style="--chip-c: #8B5CF6;">
+                  <span class="gel-chip-code">VIOLET</span>
+                  <span class="gel-chip-desc">Synthwave</span>
+                </button>
+                <button class="gel-chip" data-color="#FF5500" data-name="Sodium Vapor Streetlamp" title="Sodium Vapor (Vintage Highway Streetlight)" style="--chip-c: #FF5500;">
+                  <span class="gel-chip-code">SODIUM</span>
+                  <span class="gel-chip-desc">Streetlight</span>
+                </button>
+                <button class="gel-chip" data-color="#4A78A6" data-name="Moonlight Ambient 4100K" title="Moonlight Night Spill" style="--chip-c: #4A78A6;">
+                  <span class="gel-chip-code">MOON</span>
+                  <span class="gel-chip-desc">Moonlight</span>
+                </button>
+                <button class="gel-chip" data-color="#FF8C00" data-name="Golden Hour Sun" title="Golden Hour Warm Horizon" style="--chip-c: #FF8C00;">
+                  <span class="gel-chip-code">GOLD</span>
+                  <span class="gel-chip-desc">Golden Hour</span>
+                </button>
+                <button class="gel-chip" data-color="#00F5A0" data-name="Tokyo Emerald" title="Tokyo Emerald Matrix Glow" style="--chip-c: #00F5A0;">
+                  <span class="gel-chip-code">EMERALD</span>
+                  <span class="gel-chip-desc">Tokyo Glow</span>
+                </button>
+                <!-- VFX Keying -->
+                <button class="gel-chip vfx-chip" data-color="#00FF00" data-name="Chroma Key Green (0,255,0)" title="VFX Screen Replacement Green" style="--chip-c: #00FF00;">
+                  <span class="gel-chip-code">VFX</span>
+                  <span class="gel-chip-desc">Green Key</span>
+                </button>
+                <button class="gel-chip vfx-chip" data-color="#0047BB" data-name="Chroma Key Blue (0,71,187)" title="VFX Screen Replacement Blue" style="--chip-c: #0047BB;">
+                  <span class="gel-chip-code">VFX</span>
+                  <span class="gel-chip-desc">Blue Key</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Custom User Saved Palettes -->
+            <div class="gel-group">
+              <div class="gel-group-header">
+                <span class="gel-group-title">User Custom Saved Palette Bank</span>
+                <span class="gel-group-badge" id="customPaletteCount">3 Saved</span>
+              </div>
+              <div class="custom-palette-grid" id="customPaletteGrid">
+                <!-- Dynamically loaded from LocalStorage -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 3: CINEMA LIGHTING EFFECTS (FX ENGINE) ================= -->
+      <section class="tab-panel" id="panel-effects" role="tabpanel" aria-labelledby="tab-effects">
+        <div class="effects-deck">
+          
+          <!-- Effects Selection Grid -->
+          <div class="fx-selector-grid">
+            <button class="fx-card active" data-fx="breathe">
+              <div class="fx-card-header">
+                <span class="fx-icon">🫁</span>
+                <span class="fx-name">Breathe</span>
+              </div>
+              <p class="fx-desc">Organic sinusoidal pulsing light. Mimics breathing life or calm sci-fi core.</p>
+              <div class="fx-wave-indicator wave-breathe"></div>
+            </button>
+
+            <button class="fx-card" data-fx="candle">
+              <div class="fx-card-header">
+                <span class="fx-icon">🕯️</span>
+                <span class="fx-name">Candle / Fire</span>
+              </div>
+              <p class="fx-desc">Warm organic micro-flickers simulating campfire, lantern, or candle flame.</p>
+              <div class="fx-wave-indicator wave-candle"></div>
+            </button>
+
+            <button class="fx-card" data-fx="police">
+              <div class="fx-card-header">
+                <span class="fx-icon">🚨</span>
+                <span class="fx-name">Police / Siren</span>
+              </div>
+              <p class="fx-desc">Dual beacon emergency strobe (Red & Blue or Amber) for dramatic night scenes.</p>
+              <div class="fx-wave-indicator wave-police"></div>
+            </button>
+
+            <button class="fx-card" data-fx="lightning">
+              <div class="fx-card-header">
+                <span class="fx-icon">⚡</span>
+                <span class="fx-name">Lightning</span>
+              </div>
+              <p class="fx-desc">Random dramatic double/triple bolt strikes with realistic atmospheric decay.</p>
+              <div class="fx-wave-indicator wave-lightning"></div>
+            </button>
+
+            <button class="fx-card" data-fx="tv">
+              <div class="fx-card-header">
+                <span class="fx-icon">📺</span>
+                <span class="fx-name">TV / Screen Spill</span>
+              </div>
+              <p class="fx-desc">Subtly shifting cool/warm illumination mimicking watching a film in a dark room.</p>
+              <div class="fx-wave-indicator wave-tv"></div>
+            </button>
+
+            <button class="fx-card" data-fx="strobe">
+              <div class="fx-card-header">
+                <span class="fx-icon">⚡</span>
+                <span class="fx-name">Strobe Pulse</span>
+              </div>
+              <p class="fx-desc">Fast, periodic high-intensity bursts for nightclub or action sequence effects.</p>
+              <div class="fx-wave-indicator wave-strobe"></div>
+            </button>
+
+            <button class="fx-card" data-fx="paparazzi">
+              <div class="fx-card-header">
+                <span class="fx-icon">📸</span>
+                <span class="fx-name">Paparazzi Flashes</span>
+              </div>
+              <p class="fx-desc">Clusters of rapid camera flashbulbs for red carpets or press conference scenes.</p>
+              <div class="fx-wave-indicator wave-paparazzi"></div>
+            </button>
+
+            <button class="fx-card" data-fx="hue_loop">
+              <div class="fx-card-header">
+                <span class="fx-icon">🌈</span>
+                <span class="fx-name">Hue Cycle Loop</span>
+              </div>
+              <p class="fx-desc">Seamless 360° chromatic sweep for music videos and dynamic lighting shifts.</p>
+              <div class="fx-wave-indicator wave-rainbow"></div>
+            </button>
+          </div>
+
+          <!-- FX Live Modulation Controls -->
+          <div class="fx-controls-deck">
+            <div class="fx-param-card">
+              <div class="slider-header">
+                <label for="fxSpeedSlider">Effect Speed / Cadence</label>
+                <span id="fxSpeedValue" class="slider-val">1.0x (Normal)</span>
+              </div>
+              <input type="range" id="fxSpeedSlider" min="0.2" max="3.0" step="0.1" value="1.0" aria-label="Effect Speed">
+            </div>
+
+            <div class="fx-param-card">
+              <div class="slider-header">
+                <label for="fxIntensitySlider">Effect Depth / Intensity</label>
+                <span id="fxIntensityValue" class="slider-val">75%</span>
+              </div>
+              <input type="range" id="fxIntensitySlider" min="20" max="100" step="1" value="75" aria-label="Effect Depth">
+            </div>
+
+            <div class="fx-toggle-card">
+              <button id="btnToggleFx" class="fx-active-toggle-btn active" title="Enable or Pause Cinema Effect">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span id="fxToggleBtnText">FX Running: Breathe</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= TAB 4: MASTER BRIGHTNESS, DIFFUSION & FRAMING ================= -->
+      <section class="tab-panel" id="panel-master" role="tabpanel" aria-labelledby="tab-master">
+        <div class="master-deck">
+          
+          <!-- Master Brightness Output -->
+          <div class="slider-card full-width brightness-master-card">
+            <div class="slider-header">
+              <div class="slider-title-group">
+                <span class="card-icon">💡</span>
+                <label for="brightnessSlider">Master Luminous Output</label>
+              </div>
+              <div class="brightness-fine-controls">
+                <button class="step-btn" id="btnDimStepDown" title="Decrease Brightness 5%">-5%</button>
+                <span id="brightnessValue" class="slider-val highlight-val">100%</span>
+                <button class="step-btn" id="btnDimStepUp" title="Increase Brightness 5%">+5%</button>
+              </div>
+            </div>
+            <input type="range" id="brightnessSlider" min="1" max="100" value="100" step="1" class="bright-range" aria-label="Master Screen Brightness">
+          </div>
+
+          <!-- Framing Mattes & Softbox Edge Falloff -->
+          <div class="framing-grid">
+            
+            <div class="framing-card">
+              <div class="framing-card-header">
+                <span class="card-icon">📐</span>
+                <span class="card-title">Aspect Framing Mattes</span>
+              </div>
+              <p class="framing-card-desc">Limit screen illumination boundaries to specific camera aspect ratios.</p>
+              <div class="aspect-buttons-row">
+                <button class="aspect-btn active" data-aspect="full">Full Bleed</button>
+                <button class="aspect-btn" data-aspect="239">2.39:1 (Scope)</button>
+                <button class="aspect-btn" data-aspect="185">1.85:1 (Flat)</button>
+                <button class="aspect-btn" data-aspect="43">4:3 (Vintage)</button>
+                <button class="aspect-btn" data-aspect="916">9:16 (Reels)</button>
+              </div>
+            </div>
+
+            <div class="framing-card">
+              <div class="framing-card-header">
+                <span class="card-icon">👁️</span>
+                <span class="card-title">Eye Catchlight & Diffusion</span>
+              </div>
+              <p class="framing-card-desc">Shape the light source into a round softbox for natural circular catchlights in actors' pupils.</p>
+              <div class="catchlight-options">
+                <button class="catchlight-btn active" data-shape="none">Square / Full</button>
+                <button class="catchlight-btn" data-shape="round">Circular Softbox</button>
+                <button class="catchlight-btn" data-shape="ring">Ringlight Halo</button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Bottom Hint & Floating Controls Trigger -->
+      <footer class="hud-footer">
+        <div class="hud-tips">
+          <span>🎬 <strong>Filmmaker Shortcuts:</strong> <kbd>B</kbd> Blackout • <kbd>L</kbd> Light • <kbd>H</kbd> Disappear HUD • <kbd>F</kbd> Fullscreen • <kbd>Space</kbd> Cut/Resume • <kbd>1-4</kbd> Switch Tabs</span>
+        </div>
+        <button id="btnQuickHide" class="hide-hud-btn" title="Disappear Controller (Press H or click screen)">
+          <span>Disappear Controller</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </footer>
+    </div>
+  </aside>
+
+  <!-- Discrete Floating Pill to Restore Controls when Hidden -->
+  <!-- Note: It never disappears permanently! Filmmakers can click it, tap screen, or press 'H' / any key -->
+  <button id="btnShowHud" class="floating-pill-restore" aria-label="Restore Cinema Lighting Controls" title="Restore Controls (Press H or tap anywhere)">
+    <div class="restore-dot"></div>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 20h9"/>
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+    </svg>
+    <span>Show Controls <kbd>H</kbd></span>
+  </button>
+
+  <!-- Toast Notification Pill for Hotkeys / Palette Saves -->
+  <div id="toastNotification" class="toast-pill" role="status" aria-live="polite">
+    <span id="toastMessage">HUD Hidden — Tap anywhere or press H to reveal</span>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
