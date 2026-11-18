@@ -12,7 +12,7 @@
 <br/>
 
 <p align="center">
-  <img src="assets/hero_onset_lighting.jpg" alt="Lumina CineScreen Pro in On-Set Film Production" width="880" style="border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.15);" />
+  <img src="assets/app_interface.jpg" alt="Lumina CineScreen Pro Studio Interface" width="880" style="border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.15);" />
 </p>
 
 <p align="center">
